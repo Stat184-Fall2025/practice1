@@ -1,0 +1,79 @@
+---
+title: "Data Wrangling and Visualization Summary"
+author: "Canyi Chen"
+date: "November 10, 2025"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Data Wrangling, Visualization, and Reflection
+
+This report combines three major analytical tasks — data wrangling, visualization, and mathematical modeling — in a single reproducible workflow.
+
+```{r}
+# Load required libraries
+library(tidyverse)
+library(babynames)
+library(ggplot2)
+
+# =======================
+# 1. Armed Forces Wrangling
+# =======================
+armed_forces <- tibble(
+  branch = c("Army","Army","Army","Navy","Army"),
+  year = c(2022,2022,2022,2022,2022),
+  sex = c("M","F","M","F","F"),
+  rank = c("Private","Private","Sergeant","Private","Corporal")
+)
+
+soldiers_subset <- armed_forces |> 
+  filter(branch == "Army", year == 2022)
+
+sex_rank_table <- soldiers_subset |>
+  count(sex, rank) |>
+  pivot_wider(names_from = rank, values_from = n, values_fill = 0)
+
+print("Table 1. Frequency Table of Sex by Rank")
+print(sex_rank_table)
+
+# =======================
+# 2. Baby Names Visualization
+# =======================
+selected_names <- c("Liam", "Emma")
+
+babynames_plot_data <-
+  babynames |>
+  filter(name %in% selected_names) |>
+  group_by(year, sex, name) |>
+  summarise(count = sum(n, na.rm = TRUE), .groups = "drop")
+
+ggplot(babynames_plot_data, aes(x = year, y = count, color = name, linetype = sex)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Figure 1. Popularity of Baby Names Over Time",
+    x = "Year", y = "Number of Babies",
+    color = "Name", linetype = "Sex"
+  ) +
+  theme_minimal(base_size = 12)
+
+# =======================
+# 3. Mathematical Function Plot
+# =======================
+L <- 30
+W <- 20
+volume_box <- function(s) (L - 2*s) * (W - 2*s) * s
+
+ggplot(data.frame(s = c(0, 10)), aes(x = s)) +
+  stat_function(fun = volume_box, color = "blue", linewidth = 1.2) +
+  labs(
+    title = "Figure 2. Box Volume as a Function of Cut Size",
+    x = "Cut Size (s)",
+    y = "Volume (V)"
+  ) +
+  theme_minimal(base_size = 12)
